@@ -1,29 +1,68 @@
 #!/usr/bin/env python3
 
 import json
-from pprint import pprint
 
-from .api import NanagogoAPI
+from api import NanagogoAPI
 
 ngg = NanagogoAPI()
 
 
-class NanagogoUser(object):
+class Nanagogo(object):
+    users = {}
 
-    def __init__(self, id):
+    def flush(self):
+        self.info = {}
+
+    def info(self, *args):
+        users = {}
+
+        # The API info endpoint will return max five users at a time.
+        # Trying to request more than that will return in a HTTP 400 error.
+        chunks = [args[i:i + 5] for i in range(0, len(args), 5)]
+
+        for chunk in chunks:
+            talkids = ','.join(chunk)
+            response = ngg.talk.info(talkIds=talkids)
+            data = response['talks']
+            for user in data:
+                talkid = user['talkId']
+                users[talkid] = user
+
+        self.users.update(users)
+        return users
+
+    def user(self, id):
+        kwargs = {}
+        if id in self.users:
+            kwargs['_info'] = self.users[id]
+        return NanagogoUser(id, **kwargs)
+
+
+class NanagogoUser(object):
+    _info = {}
+
+    def __init__(self, id, _info=None):
         self.id = id
+        if _info:
+            self._info = _info
 
     @property
     def info(self):
-        result = ngg.talk.info(talkIds=self.id)
-        info = result['talks'][0]
+        if not self._info:
+            response = ngg.talk.info(talkIds=self.id)
+            info = response['talks'][0]
 
-        if not info['talkId'] == self.id:
-            raise
+            if not info['talkId'] == self.id:
+                raise
 
-        return info
+            self._info = info
 
-    def feed(self, postid=None, limit=100, data_only=True):
+        return self._info
+
+    def flush(self):
+        self._info = {}
+
+    def feed(self, postid=None, limit=100, posts_only=True):
         if not postid:
             postid = self.info['lastPostId']
 
@@ -33,7 +72,7 @@ class NanagogoUser(object):
                   'talkId': self.id}
         data = ngg.talk.post.list(**params)
 
-        if data_only:
+        if posts_only:
             return data['posts']
         else:
             return data
@@ -54,10 +93,4 @@ class NanagogoUser(object):
 
 
 if __name__ == "__main__":
-    u = NanagogoUser('AGsfxp1A1kO9GtN76wEuUm==')
-
-    for m in u.iterfeed(postid=10):
-        body = m['body']
-        for node in body:
-            if node.get('image', None) and node['bodyType'] == 3:
-                pprint(node['image'])
+    n = Nanagogo()
