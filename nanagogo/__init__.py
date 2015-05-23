@@ -2,7 +2,7 @@
 
 import json
 
-from api import NanagogoAPI
+from nanagogo.api import NanagogoAPI
 
 ngg = NanagogoAPI()
 
@@ -11,31 +11,37 @@ class Nanagogo(object):
     users = {}
 
     def flush(self):
-        self.info = {}
+        for user in self.users:
+            self.users[user].flush()
 
     def info(self, *args):
         users = {}
 
-        # The API info endpoint will return max five users at a time.
-        # Trying to request more than that will return in a HTTP 400 error.
+        # The API info endpoint will return info about maximum five users at a time.
+        # Trying to request any more than that will result in a HTTP 400 error.
         chunks = [args[i:i + 5] for i in range(0, len(args), 5)]
 
         for chunk in chunks:
             talkids = ','.join(chunk)
             response = ngg.talk.info(talkIds=talkids)
             data = response['talks']
-            for user in data:
-                talkid = user['talkId']
-                users[talkid] = user
+            for userinfo in data:
+                talkid = userinfo['talkId']
+                users[talkid] = userinfo
 
-        self.users.update(users)
+                if talkid in self.users:
+                    self.users[talkid]._info = userinfo
+                else:
+                    self.users[talkid] = NanagogoUser(talkid, _info=userinfo)
+
         return users
 
     def user(self, id):
         kwargs = {}
-        if id in self.users:
-            kwargs['_info'] = self.users[id]
-        return NanagogoUser(id, **kwargs)
+        if not id in self.users:
+            self.users[id] = NanagogoUser(id)
+
+        return self.users[id]
 
 
 class NanagogoUser(object):
@@ -52,15 +58,18 @@ class NanagogoUser(object):
             response = ngg.talk.info(talkIds=self.id)
             info = response['talks'][0]
 
-            if not info['talkId'] == self.id:
-                raise
-
             self._info = info
 
         return self._info
 
     def flush(self):
         self._info = {}
+
+    def status(self, status_id):
+        path = 'talk/post/detail/{}/{}'.format(self.id, status_id)
+        e = ngg.path(path)
+        status = e()
+        return status
 
     def feed(self, postid=None, limit=100, posts_only=True):
         if not postid:
@@ -93,4 +102,5 @@ class NanagogoUser(object):
 
 
 if __name__ == "__main__":
+    from pprint import pprint
     n = Nanagogo()
