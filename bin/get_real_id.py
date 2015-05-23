@@ -32,4 +32,4 @@ if __name__ == "__main__":
             url = 'http://7gogo.jp/lp/{}'.format(id)
 
         real_id = get_real_id(url)
-        print('{} : {}'.format(id, real_id))
+        print('{} : {}'.format(url, real_id))
