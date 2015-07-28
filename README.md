@@ -14,30 +14,5 @@ There's a script included that gets a user's talkId by parsing the HTML/JSON fro
 
 
 ## Example usage
-    >>> from nanagogo import Nanagogo
-    >>> n = Nanagogo()
 
-    # Lookup the info for one or multiple users
-    # This will also create NanagogoUser objects for the user, that will be returned if
-    # n.user(some_talkId) is called later. This is done so we can cache the info, since 
-    # the latest postId is needed when using NanagogoUser.feed() 
-    >>> n.info('ZfBGUyrVNdV9GtN76wEuUm==', 'l3A8zzksqtb9GtN76wEuUm==', 'c_hnwvneyJV9GtN76wEuUm==')
-    
-
-## Example usage, user objects:
-
-    # Create a user object:
-    >>> u = n.user('c_hnwvneyJV9GtN76wEuUm==')
-
-    # Get the user's info
-    >>> u.info
-
-    # Get the user's most recent statuses:
-    >>> feed = u.feed()
-
-    # Get a status
-    >>> status = u.status(20)
-
-    # Iterate over a user's timeline
-    >>> for post in u.iterfeed:
-    >>>     print(post)
+out of date...
