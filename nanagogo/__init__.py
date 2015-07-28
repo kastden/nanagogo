@@ -210,7 +210,7 @@ class NanagogoUser(object):
         This is a cached property, call :meth:`NanagogoUser.flush() <NanagogoUser.flush()>` to clear it."""
 
         if not self._info:
-            _get_user_info(self.talkid)
+            response = _get_user_info(self.talkid)
 
             # TODO: Better error handling if invalid/wrong result from the API
             info = response['talks'][0]
