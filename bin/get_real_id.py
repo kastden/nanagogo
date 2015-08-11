@@ -30,10 +30,14 @@ def get_real_id(url):
     r = requests.get(url)
     r.raise_for_status()
 
-    match = re.compile('setting = ({.*?});', re.DOTALL)
-    setting = match.search(r.text).group(1)
-    data = yaml.load(setting)
+    pattern = re.compile('setting = ({.*?});', re.DOTALL)
 
+    try:
+        setting = pattern.search(r.text).group(1)
+    except AttributeError:
+        raise ValueError("Couldn't find settings dictionary in page")
+
+    data = yaml.load(setting)
     return data['talkId']
 
 
