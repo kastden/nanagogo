@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-import re
-import time
 
 import requests
 
@@ -18,6 +16,8 @@ class NanagogoError(Exception):
 
 
 class NanagogoResponse(object):
+    """The response from the 7gogo private JSON API, returned as
+    either a dict or a list."""
     pass
 
 
