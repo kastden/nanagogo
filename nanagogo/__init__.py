@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from nanagogo.api import NanagogoRequest, NanagogoError
+from nanagogo.api import NanagogoRequest, NanagogoError, s
 
 
 def get(path, params={}):
@@ -31,7 +31,7 @@ class NanagogoTalk(object):
         path = ("talks", self.name, "posts")
         params = {'limit': count,
                   'targetId': targetid,
-                  'direction': direction}
+                  'direction': direction.upper()}
         return get(path, params=params)
 
     def iterfeed(self, count=200, targetid=None):
