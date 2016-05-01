@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from nanagogo.api import NanagogoRequest, NanagogoError, s
+import time
 
 
 def get(path, params={}):
@@ -32,24 +33,48 @@ class NanagogoTalk(object):
         params = {'limit': count,
                   'targetId': targetid,
                   'direction': direction.upper()}
+
         return get(path, params=params)
 
-    def iterfeed(self, count=200, targetid=None):
+    def iterfeed(self, count=200, targetid=None, direction="PREV"):
+        direction = direction.upper()
+
         while True:
+            # when using next as a parameter to the direction argument
+            # the results are off by 10
+            if (direction == "NEXT" and targetid):
+                targetid = int(targetid) - 10
+
             feed = self.feed(count=count,
                              targetid=targetid,
-                             direction="PREV")
+                             direction=direction)
+
+            if direction == "NEXT":
+                feed = feed[::-1]
 
             if len(feed) == 0:
                 break
 
             yield feed
 
-            targetid = feed[-1]['post']['postId'] - 1
+            previous_targetid = targetid
+            if direction == "NEXT":
+                targetid = feed[-1]['post']['postId'] + 1
+            else:
+                targetid = feed[-1]['post']['postId'] - 1
+
             if targetid <= 0:
+                break
+            elif ((direction == "NEXT") and
+                    (previous_targetid == (targetid - 10))):
                 break
 
 
 if __name__ == "__main__":
-    tani = NanagogoTalk('tani-marika')
-    print(tani.info)
+    from pprint import pprint
+
+    nt = NanagogoTalk('okada-nana')
+    for feed in nt.iterfeed(count=300, targetid=1000, direction="next"):
+        for post in feed:
+            pprint(post['post']['postId'])
+        print()
