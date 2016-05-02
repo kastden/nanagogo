@@ -19,6 +19,31 @@ def post(path, params={}, data=None):
     return r.wrap()
 
 
+class NanagogoUser(object):
+    def __init__(self, userid):
+        self.userid = userid
+
+    @property
+    def info(self):
+        path = ("users", self.userid)
+        return get(path)
+
+    @property
+    def maintalk(self):
+        path = ("users", self.userid, "mainTalk")
+        return get(path)
+
+    @property
+    def grouptalks(self):
+        path = ("users", self.userid, "groupTalks")
+        return get(path)
+
+    @property
+    def ownertalks(self):
+        path = ("users", self.userid, "ownerTalks")
+        return get(path)
+
+
 class NanagogoTalk(object):
     def __init__(self, name):
         self.name = name
@@ -27,6 +52,10 @@ class NanagogoTalk(object):
     def info(self):
         path = ("talks", self.name)
         return get(path)
+
+    @property
+    def userid(self):
+        return self.info['user']['userId']
 
     def feed(self, count=30, targetid=None, direction="PREV"):
         path = ("talks", self.name, "posts")
@@ -74,7 +103,9 @@ if __name__ == "__main__":
     from pprint import pprint
 
     nt = NanagogoTalk('okada-nana')
-    for feed in nt.iterfeed(count=300, targetid=1000, direction="next"):
-        for post in feed:
-            pprint(post['post']['postId'])
-        print()
+    nu = NanagogoUser(nt.userid)
+    print(nu.ownertalks)
+    # for feed in nt.iterfeed(count=300, targetid=1000, direction="next"):
+    #     for post in feed:
+    #         pprint(post['post']['postId'])
+    #     print()
