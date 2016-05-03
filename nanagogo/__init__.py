@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from logging import warning
+
 from nanagogo.api import NanagogoRequest, NanagogoError, s
-import time
+
 
 
 def get(path, params={}):
@@ -42,6 +44,18 @@ class NanagogoUser(object):
     def ownertalks(self):
         path = ("users", self.userid, "ownerTalks")
         return get(path)
+        
+    @property
+    def following(self):
+        path = ("users", self.userid, "followTalks")
+        data = get(path)
+        
+        if data['nextExisted']:
+            warning("nextExisted array not empty in {}".format('/'.join(path)))
+        
+        following = data['talk']
+        
+        return following
 
 
 class NanagogoTalk(object):
@@ -104,7 +118,9 @@ if __name__ == "__main__":
 
     nt = NanagogoTalk('okada-nana')
     nu = NanagogoUser(nt.userid)
-    print(nu.ownertalks)
+    
+    for i in nu.following:
+        print(i)
     # for feed in nt.iterfeed(count=300, targetid=1000, direction="next"):
     #     for post in feed:
     #         pprint(post['post']['postId'])
