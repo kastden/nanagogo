@@ -48,7 +48,8 @@ class NanagogoUser(object):
     @property
     def following(self):
         path = ("users", self.userid, "followTalks")
-        data = get(path)
+        params = {'limit': 500}
+        data = get(path, params=params)
         
         if data['nextExisted']:
             warning("nextExisted array not empty in {}".format('/'.join(path)))
