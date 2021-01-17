@@ -59,6 +59,7 @@ class NanagogoUser(object):
         return following
 
 
+
 class NanagogoTalk(object):
     def __init__(self, name):
         self.name = name
@@ -82,19 +83,19 @@ class NanagogoTalk(object):
 
     def iterfeed(self, count=200, targetid=None, direction="PREV"):
         direction = direction.upper()
-
+             
         while True:
             # when using next as a parameter to the direction argument
             # the results are off by 10
-            if (direction == "NEXT" and targetid):
-                targetid = int(targetid) - 10
+            # if (direction == "NEXT" and targetid):
+            #     targetid = int(targetid) - 10
 
             feed = self.feed(count=count,
                              targetid=targetid,
                              direction=direction)
 
-            if direction == "NEXT":
-                feed = feed[::-1]
+            # if direction == "NEXT":
+            #     feed = feed[::-1]
 
             if len(feed) == 0:
                 break
@@ -110,7 +111,7 @@ class NanagogoTalk(object):
             if targetid <= 0:
                 break
             elif ((direction == "NEXT") and
-                    (previous_targetid == (targetid - 10))):
+                     (previous_targetid == targetid - 10)):
                 break
 
 
